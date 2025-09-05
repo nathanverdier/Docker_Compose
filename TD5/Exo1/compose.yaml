@@ -1,0 +1,8 @@
+services:
+  my_cat:
+    container_name: compose_cat_msg
+    build:
+      context: .
+      dockerfile: ./image/Dockerfile
+    
+    # sudo docker-compose -f compose.yaml up --build
