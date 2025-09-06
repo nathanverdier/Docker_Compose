@@ -3,6 +3,7 @@ services:
     container_name: compose_cat_msg
     build:
       context: .
+      dockerfile: image/Dockerfile
     volumes:
       - ./msg.txt:/opt/msg.txt
     
