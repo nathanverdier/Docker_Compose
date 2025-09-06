@@ -1,0 +1,26 @@
+services:
+  my_server_js:
+    image: postgres:latest
+    container_name: compose_postgres_serveur
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-data:/etc/data
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./db_password.txt
+
+volumes:
+  db-data:
+
+    # sudo docker-compose -f compose.yaml up --build -d
+    # connexion psql : psql -h localhost -p 5432 -U john -d doe
+    # \du pour lister les utilisateurs
+    # déconnecté la base : sudo docker-compose -f compose.yaml down
