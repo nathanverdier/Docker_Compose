@@ -4,6 +4,6 @@ services:
     build:
       context: ./image
     ports:
-      - "3030:3030"
+      - "127.0.0.1:3030:3030"
 
     # sudo docker-compose -f compose.yaml up --build
