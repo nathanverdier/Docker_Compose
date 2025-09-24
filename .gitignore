@@ -1,0 +1,7 @@
+# Ignorer les fichiers tar volumineux
+*.tar
+
+# Autres fichiers à ignorer
+.env
+*.log
+node_modules/
