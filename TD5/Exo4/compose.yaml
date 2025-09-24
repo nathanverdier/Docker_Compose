@@ -1,5 +1,5 @@
 services:
-  my_server_js:
+  postgres_server:
     image: postgres:latest
     container_name: compose_postgres_serveur
     env_file:
@@ -8,19 +8,51 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     ports:
       - "127.0.0.1:5432:5432"
-    volumes:
-      - db-data:/etc/data
     secrets:
       - db_password
+    healthcheck: # Permet de vérifier que le service est prêt avant de lancer debian_psql
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  debian_psql:
+    depends_on:
+      postgres_server:
+        condition: service_healthy
+    build:
+      context: ./debian_psql
+    container_name: debian_psql
+    env_file:
+      - .env
+    environment:
+      PGHOST: postgres_server
+      PGUSER: john
+      PGDATABASE: doe
+    secrets:
+      - db_password
+    entrypoint: ["/bin/sh", "-c", "export PGPASSWORD=$$(cat /run/secrets/db_password) && exec psql -c \"SELECT 1;\""]
+    # permet d'exécuter une commande au démarrage du conteneur et de remplacer le processus principal du conteneur par cette commande.
 
 secrets:
   db_password:
     file: ./db_password.txt
 
-volumes:
-  db-data:
+    # Au début j'avais un exited(2) car mon debian_psql n'arrivait pas à se connecter à postgres_server du au fait que postgres_server n'était pas encore prêt
+    # J'ai donc ajouté un depends_on à debian et un healthcheck à postgres_server
+    # export PGPASSWORD=$$(cat /run/secrets/db_password) et le seul moyen que j'ai trouvé pour que psql puisse lire le mot de passe dans le secret
 
     # sudo docker-compose -f compose.yaml up --build -d
-    # connexion psql : psql -h localhost -p 5432 -U john -d doe
-    # \du pour lister les utilisateurs
-    # déconnecté la base : sudo docker-compose -f compose.yaml down
+    # et en parrallèle dans un autre terminal : 
+
+    # watch -n 1 'sudo docker ps -a --format "table {{.Names}}\t{{.Status}}"'
+
+    # résultat de la commande : 
+    # Toutes les 1,0s: sudo docker ps -a -...  debian: Wed Sep 24 13:56:57 2025
+
+    # NAMES                      STATUS
+    # debian_psql                Exited (0) 10 seconds ago
+    # compose_postgres_serveur   Up 21 seconds (healthy)
+
+
+    # Lien du git : https://github.com/nathanverdier/Docker_Compose.git

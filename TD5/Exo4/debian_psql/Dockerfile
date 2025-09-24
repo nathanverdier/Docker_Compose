@@ -1,5 +1,5 @@
 FROM debian:latest
-RUN apt-get install -y postgresql
+RUN apt-get update && apt-get install -y postgresql-client
 
 # Crée un réseau docker
 
