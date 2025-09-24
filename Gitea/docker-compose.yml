@@ -1,0 +1,98 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    container_name: gitea-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    networks:
+      - gitea
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__actions__ENABLED=true
+    restart: unless-stopped
+    networks:
+      - gitea
+    volumes:
+      - gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "222:22"
+    depends_on:
+      - db
+
+  runner:
+    image: docker.io/gitea/act_runner:nightly
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "${INSTANCE_URL}"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "${REGISTRATION_TOKEN}"
+      GITEA_RUNNER_NAME: "${RUNNER_NAME}"
+      GITEA_RUNNER_LABELS: "${RUNNER_LABELS}"
+    volumes:
+      - ./config.yaml:/config.yaml
+      - runner_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - gitea
+    networks:
+      - gitea
+    restart: unless-stopped
+
+volumes:
+  gitea_data:
+    driver: local
+  postgres_data:
+    driver: local
+  runner_data:
+    driver: local
+
+networks:
+  gitea:
+    name: gitea
+    driver: bridge
+
+# Commandes pour lancer le tout :
+# sudo docker-compose -f docker-compose.yml up --build -d
+
+# Pour vérifier :
+# sudo docker-compose ps
+
+# Lien du git :
+# http://localhost:3000
+
+# Documentation Gitea :
+# https://docs.gitea.com/usage/actions/act-runner
+
+# faire la configuration initiale de gitea (BDD, mail, etc)
+
+# id : gitea
+# mdp : gitea
+
+# id admin : admin
+# mdp admin : admin
+
+# Crée le un dépôt, puis dans Configuration -> Actions -> Exécuteurs -> copié le token
+# Mettre à jour le fichier .env avec l'url de l'instance et le token
+
+# Créer un repository webapp
+# faire un git init
+# git add .
+# git commit -m "Initial commit: webapp"
+# Créer .gitea/workflows/build.yaml avec cargo test
+# git remote add origin http://localhost:3000/admin/webapp.git
+# git push origin master
+
+# (Voir les screenshots dans le dossier screenshots)
