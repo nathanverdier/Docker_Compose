@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f compose.yaml
+    kompose.version: 1.37.0 (fb0539e64)
+  labels:
+    io.kompose.service: webapp
+  name: webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      io.kompose.service: webapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f compose.yaml
+        kompose.version: 1.37.0 (fb0539e64)
+      labels:
+        io.kompose.service: webapp
+    spec:
+      containers:
+        - env:
+            - name: MONGODB_HOST
+              value: mongodb
+            - name: MONGODB_PASSWORD
+              value: password
+            - name: MONGODB_USER
+              value: root
+          image: webapp-2:latest
+          imagePullPolicy: Never # Ne jamais tenter de tirer l'image depuis un registre distant
+          name: webapp-container
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe: # Probe de disponibilité pour la webapp
+            httpGet:
+              path: /
+              port: 8080 # Port à vérifier
+            initialDelaySeconds: 20 # Délai avant la première vérification
+          volumeMounts:
+            - mountPath: /var/log/webapp
+              name: webapp-logs
+      restartPolicy: Always
+      volumes:
+        - name: webapp-logs
+          persistentVolumeClaim:
+            claimName: webapp-logs
