@@ -1,0 +1,188 @@
+# dans un premier temps il faut charger l'image webapp-1.tar
+# sudo docker load -i webapp-1.tar
+# Loaded image: webapp-1:latest
+
+
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb_server
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - webapp_network
+
+  # webapp:
+  #   image: webapp-1:latest  # Image chargée depuis webapp-1.tar
+  #   container_name: webapp_container
+  #   depends_on:
+  #     - mongodb
+  #   ports:
+  #     - "8080:8080"  # Port 8080 indiqué par Lucas sur le post-it
+  #   environment:
+  #     MONGODB_USER: root
+  #     MONGODB_PASSWORD: password
+  #     MONGODB_HOST: mongodb
+  #   volumes:
+  #     - webapp_logs:/var/log/webapp  # Fix pour le répertoire de logs manquant
+  #   networks:
+  #     - webapp_network
+
+  webapp:
+    image: webapp-2:latest  # Image chargée depuis webapp-2.tar
+    container_name: webapp_container
+    depends_on:
+      - mongodb
+    ports:
+      - "8080:8080"  # Port 8080 indiqué par Lucas sur le post-it
+    environment:
+      MONGODB_USER: root
+      MONGODB_PASSWORD: password
+      MONGODB_HOST: mongodb
+    volumes:
+      - webapp_logs:/var/log/webapp  # Permet de persister les logs
+    networks:
+      - webapp_network
+
+volumes:
+  mongodb_data:
+  webapp_logs:  # Volume pour les logs de la webapp
+
+networks:
+  webapp_network:
+    driver: bridge
+
+
+# en faisant un docker-compose up --build -d
+# puis en allant sur http://localhost:8080
+# je tombe sur la page d'accueil de l'application webapp
+# je peut ajouter un utilisateur 
+# mais il y a une erreur : La connexion avec le serveur a été réinitialisée pendant le chargement de la page.
+# en regardant les logs du conteneur webapp_container j'ai l'erreur suivante :
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:12' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | thread 'actix-rt|system:0|arbiter:13' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:14' panicked at src/main.rs:52:9:
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | explicit panic
+# webapp_container | thread 'actix-rt|system:0|arbiter:15' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:0' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:1' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | thread 'actix-rt|system:0|arbiter:2' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:3' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+# webapp_container | thread 'actix-rt|system:0|arbiter:4' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | thread 'actix-rt|system:0|arbiter:5' panicked at src/main.rs:52:9:
+# webapp_container | explicit panic
+# webapp_container | 13:06:56 [ERROR] unable to create /var/log/webapp/webapp.log (No such file or directory (os error 2)), exiting
+
+# L'ajout a été fait une fois l'ajout du volume webapp_logs
+# User "user1 user1" added to the database
+
+# Pour corriger l'erreur Lucas devrais ajouté dans le Dockerfile de webapp-1:
+# RUN mkdir -p /var/log/webapp
+
+# Kubernetes
+# Installer kubectl et minikube
+# kubectl get all
+# Allez dans le repertoire TD6
+# kompose convert -f compose.yaml
+# ls -l *.yaml
+# -rw-r--r-- 1 nathan nathan 4788 24 sept. 16:42 compose.yaml
+# -rw-r--r-- 1 nathan nathan  210 24 sept. 16:42 mongodb-data-persistentvolumeclaim.yaml
+# -rw-r--r-- 1 nathan nathan 1108 24 sept. 16:42 mongodb-deployment.yaml
+# -rw-r--r-- 1 nathan nathan  322 24 sept. 16:42 mongodb-service.yaml
+# -rw-r--r-- 1 nathan nathan 1123 24 sept. 16:42 webapp-deployment.yaml
+# -rw-r--r-- 1 nathan nathan  208 24 sept. 16:42 webapp-logs-persistentvolumeclaim.yaml
+# -rw-r--r-- 1 nathan nathan  316 24 sept. 16:42 webapp-service.yaml
+# Les fichiers yaml sont générés et crée comme il faut
+# j'ai déplacer les fichiers générés dans un sous répertoire
+# kubectl apply -f ./
+
+# kubectl get pods
+# NAME                       READY   STATUS             RESTARTS   AGE
+# mongodb-646bcb55bc-sgprc   1/1     Running            0          2m51s
+# webapp-b89898465-blfnr     0/1     ImagePullBackOff   0          2m51s
+
+# Ordre d'appplication des fichiers
+## kubectl apply -f mongodb-data-persistentvolumeclaim.yaml
+## persistentvolumeclaim/webapp-logs created
+## kubectl apply -f webapp-logs-persistentvolumeclaim.yaml
+## persistentvolumeclaim/mongodb-data created
+
+## kubectl apply -f mongodb-service.yaml
+## service/mongodb created
+## kubectl apply -f mongodb-deployment.yaml
+## deployment.apps/mongodb created
+
+## kubectl apply -f webapp-service.yaml
+## service/webapp created
+## kubectl apply -f webapp-deployment.yaml
+## deployment.apps/webapp created
+
+# On le fait dans cette ordre car les PersistentVolumeClaims doivent être créés en premier puis les Services doivent être créés ensuite car les Deployments en ont besoin pour fonctionner correctement.
+
+# Sa n'a pas été deployé correctement car j'ai une erreur ImagePullBackOff
+# car l'image webapp-2:latest n'est pas dans un registre d'images
+# Il faut donc charger l'image dans minikube
+#  eval $(minikube docker-env)
+
+# kubectl delete -f .
+
+# eval $(minikube docker-env)
+# docker load -i webapp-2.tar
+# empêcher le pod webapp de tenter de tirer l'image depuis un registre distant
+
+## kubectl apply -f mongodb-data-persistentvolumeclaim.yaml
+## persistentvolumeclaim/webapp-logs created
+## kubectl apply -f webapp-logs-persistentvolumeclaim.yaml
+## persistentvolumeclaim/mongodb-data created
+
+## kubectl apply -f mongodb-service.yaml
+## service/mongodb created
+## kubectl apply -f mongodb-deployment.yaml
+## deployment.apps/mongodb created
+
+## kubectl apply -f webapp-service.yaml
+## service/webapp created
+## kubectl apply -f webapp-deployment.yaml
+## deployment.apps/webapp created
+
+# Résultat : 
+# NAME                       READY   STATUS    RESTARTS   AGE
+# mongodb-6f6d747fd5-7h8m9   1/1     Running   0          4m5s
+# webapp-86bf4b67f6-pks68    1/1     Running   0          31s
+
+# Mettre replicas à 2 dans webapp-deployment.yaml
+# puis refaire un kubectl apply -f webapp-deployment.yaml
+# NAME                       READY   STATUS    RESTARTS   AGE
+# mongodb-6f6d747fd5-7h8m9   1/1     Running   0          7m20s
+# webapp-86bf4b67f6-pks68    1/1     Running   0          3m46s
+# webapp-86bf4b67f6-xdwfh    1/1     Running   0          26s
+
+# Suite à la suppression d'un pod webapp : kubectl delete pod webapp-86bf4b67f6-pks68
+# Il en recrée un automatiquement
+# NAME                       READY   STATUS    RESTARTS   AGE
+# mongodb-6f6d747fd5-7h8m9   1/1     Running   0          9m4s
+# webapp-86bf4b67f6-sw6vw    1/1     Running   0          33s
+# webapp-86bf4b67f6-xdwfh    1/1     Running   0          2m10s
+
