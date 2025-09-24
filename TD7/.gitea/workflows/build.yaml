@@ -1,0 +1,16 @@
+name: Test Webapp
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env: # Variables d'environnement pour la connexion à MongoDB
+      MONGODB_USER: testuser
+      MONGODB_PASSWORD: testpass
+      MONGODB_HOST: localhost
+
+    steps:
+      - uses: actions/checkout@v4 # Récupère le code du dépôt
+      - uses: dtolnay/rust-toolchain@stable # Installe Rust
+      - run: cargo test # Lance les tests
