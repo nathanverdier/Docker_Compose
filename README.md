@@ -43,11 +43,12 @@ Le dépôt est organisé en plusieurs dossiers thématiques :
 - Volumes persistants
 - Applications web conteneurisées
 
-### [**Gitea_CI_CD**](Gitea_CI_CD) : **Pipeline d'Intégration Continue**  
-- Serveur Gitea avec PostgreSQL
-- Configuration Gitea Actions
-- Pipeline de tests automatisés
-- Application web de démonstration
+### [**TD7**](TD7) : **Pipeline CI/CD avec Gitea**  
+- **Gitea** : Serveur Git avec interface web et PostgreSQL
+- **Actions Runner** : Runner configuré pour pipeline CI/CD
+- **Webapp** : Application Rust avec tests automatisés
+- **MongoDB** : Service de base de données pour les tests
+- **Documentation** : Screenshots et archive finale
 
 ## Exercices Réalisés
 
@@ -62,12 +63,13 @@ Le dépôt est organisé en plusieurs dossiers thématiques :
 - [x] Gestion des volumes persistants
 - [x] Services et expositions d'applications
 
-### 🚧 Projet Final - Gitea CI/CD
-- [x] Configuration serveur Gitea
-- [x] Base de données PostgreSQL
-- [x] Pipeline d'intégration continue
-- [ ] Tests automatisés complets
-- [ ] Documentation finale
+### ✅ TD7 - Pipeline CI/CD avec Gitea Actions
+- [x] Configuration serveur Gitea avec PostgreSQL
+- [x] Gitea Actions Runner avec réseau Docker personnalisé
+- [x] Pipeline CI/CD pour application Rust
+- [x] Service MongoDB pour tests automatisés
+- [x] Variables d'environnement et configuration complète
+- [x] Documentation et screenshots de fonctionnement
 
 ## Technologies Utilisées
 
@@ -76,7 +78,9 @@ Le dépôt est organisé en plusieurs dossiers thématiques :
 &nbsp; ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 &nbsp; ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 &nbsp; ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+&nbsp; ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 &nbsp; ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+&nbsp; ![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
 &nbsp; ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
 &nbsp; ![Gitea](https://img.shields.io/badge/Gitea-609926?style=for-the-badge&logo=gitea&logoColor=white)
 &nbsp; ![Debian](https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white)
@@ -161,6 +165,6 @@ docker-compose up -d
 
 **Cours** : Virtualisation et Conteneurisation  
 **Année** : 2024-2025  
-**Institution** : [Votre École]
+**Institution** : ESIEA - Laval
 
 </div>
