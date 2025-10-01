@@ -1,0 +1,134 @@
+networks:
+  gitea:
+    external: false
+    name: gitea
+
+services:
+  server:
+    image: docker.gitea.com/gitea:1.24.6
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+      - GITEA__actions__ENABLED=true # Pour activer Gitea Actions
+      - GITEA__actions__DEFAULT_ACTIONS_URL=github # URL par défaut pour les actions
+      - GITEA__DEFAULT__RUN_MODE=prod # Mode de production
+    restart: always
+    networks:
+      - gitea
+    volumes:
+      - gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "222:22"
+    depends_on:
+      - db
+
+  runner:
+    image: docker.io/gitea/act_runner:nightly
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "${INSTANCE_URL}"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "${REGISTRATION_TOKEN}"
+      GITEA_RUNNER_NAME: "${RUNNER_NAME}"
+      GITEA_RUNNER_LABELS: "${RUNNER_LABELS}"
+    volumes:
+      - ./config.yaml:/config.yaml
+      - runner_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock 
+    networks:
+      - gitea # Ajout du réseau gitea pour le runner sinon il ne peut pas joindre le server
+    ports:
+      - "8088:8088"  # Port pour le cache
+    depends_on:
+      - server
+    restart: unless-stopped # redémarre le conteneur en cas de plantage ou d'arrêt sauf si on le stoppe manuellement
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  db:
+    image: docker.io/library/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    networks:
+      - gitea
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  gitea_data:
+    driver: local
+  runner_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+
+# Faire ceci : docker pull docker.io/gitea/act_runner:latest # for the latest stable release
+# Le .env pour le runner est récupérer dans le fichier config.yaml
+# les volumes pour le runner et le server sont en des volumes docker
+# mettre le "gitea" comme nom du réseau dans le config.yaml à la place de ""
+# dans un terminal faire : sudo docker compose up 
+# Dans un autre faire : sudo docker compose ps
+# allez dans le navigateur à l'adresse http://localhost:3000/user/sign_up pour configurer gitea
+
+# Configuration initiale
+
+# Type de base de données : PostgreSQL
+# Hôte : db:5432
+# Nom d'utilisateur : gitea
+# Mot de passe : gitea
+# Nom de la base de données : gitea
+
+# Titre du site : Gitea TD Nathan (ou ce que vous voulez)
+# URL racine : http://localhost:3000/
+# Port SSH du serveur : 22
+
+# Nom d'utilisateur de l'administrateur : admin
+# Mot de passe : admin123 (ou ce que vous voulez)
+# Confirmez le mot de passe : admin123
+# Adresse e-mail de l'administrateur : admin@localhost.com
+
+# Cliquez sur "Installer Gitea"
+
+# Puis dans l'interface web de gitea, allez dans "Configuration" (en haut à droite sous votre avatar après avoir clické dessus) -> "Actions" -> "Exécuteurs" -> "Crée un nouvel exécuteur" -> Copier le token d'enregistrement
+# Remplacer le REGISTRATION_TOKEN dans le .env par le token copié
+# Puis faire un docker compose down
+# Puis un docker compose up -d (-d pour détacher)
+# Ou 
+# sudo docker compose restart runner
+# sudo docker compose ps --all (pour voir les conteneurs)
+# Si erreur du runner : sudo docker compose run --rm runner ./act_runner register --instance http://gitea:3000 --token <token> --no-interactive 
+
+# Création d'un dépôt de test
+# Allez dans "Dépôts" -> "Nouveau dépôt"
+# Nom du dépôt : webapp-td
+# Initialiser ce dépôt avec un README
+# Cliquer sur "Créer un dépôt"
+
+# Créer un fichier .gitea/workflows/ci.yaml dans le dépôt avec le contenu suivant
+# Récupérer le projet webapp-td
+# le dézipper
+# puis faire un git init
+# git add .
+# git commit -m ":tada: Create: Initial commit"
+# git push origin main
+# Username for 'http://localhost:3000': admin
+# Password for 'http://admin@localhost:3000': admin123
+
+# Aller dans le dépôt webapp-td dans gitea
+# Aller dans "Actions", pour voir les actions en cours
+# Cliquer sur la dernière action en cours
+
+# (Voir screenshot dans le dossier screenshot)

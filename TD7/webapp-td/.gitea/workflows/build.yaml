@@ -1,0 +1,25 @@
+name: Test Webapp
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest # Utiliser une machine virtuelle Ubuntu
+
+    services:
+      mongodb:
+        image: mongo:latest
+        env:
+          MONGO_INITDB_ROOT_USERNAME: testuser # Nom d'utilisateur pour MongoDB
+          MONGO_INITDB_ROOT_PASSWORD: testpass # Mot de passe pour MongoDB
+        ports:
+          - 27017:27017 # Exposer le port 27017
+
+    env:
+      MONGODB_USER: testuser # Variables d'environnement pour la webapp
+      MONGODB_PASSWORD: testpass # Correspondent aux valeurs définies pour MongoDB
+      MONGODB_HOST: localhost:27017 # Utiliser localhost pour se connecter au service MongoDB
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
