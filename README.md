@@ -150,7 +150,7 @@ docker-compose up -d
 <div align="center">  
 
 <a href="https://github.com/nathanverdier">  
-<img src="https://avatars.githubusercontent.com/u/nathanverdier" height="50px" style="border-radius: 50%;">  
+<img src="https://www.proservices-informatique.fr/wp-content/uploads/2023/11/abonnement-assistance-maintenance-informatique.png" height="50px">  
 </a>  
 
 <strong>VERDIER Nathan</strong>  
@@ -164,7 +164,7 @@ docker-compose up -d
 <div align="center">
 
 **Cours** : Virtualisation et Conteneurisation  
-**Année** : 2024-2025  
+**Année** : 2025-2026  
 **Institution** : ESIEA - Laval
 
 </div>
